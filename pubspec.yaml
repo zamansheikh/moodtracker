@@ -1,0 +1,30 @@
+name: moodtracker
+description: "AI-powered mood tracker"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  fl_chart: ^0.70.2
+  intl: ^0.20.2
+  flutter_dotenv: ^5.2.1
+  audioplayers: ^6.4.0
+  path_provider: ^2.1.5
+  speech_to_text: ^7.0.0
+  record: ^6.0.0
+  google_generative_ai: ^0.4.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env  # Include .env file as an asset
