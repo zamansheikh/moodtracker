@@ -1,6 +1,5 @@
-import 'dart:io';
-import '../lib/services/mood_api_service.dart';
-import '../lib/constants/api_constants.dart';
+import 'lib/services/mood_api_service.dart';
+import 'lib/constants/api_constants.dart';
 
 /// Simple script to test the API integration manually
 void main() async {
