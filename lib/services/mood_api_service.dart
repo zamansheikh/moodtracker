@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../constants/api_constants.dart';
 import '../models/mood_summary_model.dart';
+import '../models/analyze_entry_model.dart';
 
 class MoodApiService {
   static const Duration _timeout = Duration(seconds: 30);
@@ -75,7 +77,53 @@ class MoodApiService {
 
     final recentPercentage = recentPositive / recentEntries.length;
     final olderPercentage = olderPositive / olderEntries.length;
-
     return ((recentPercentage - olderPercentage) * 100);
+  }
+
+  // Analyze audio entry by uploading audio file
+  Future<AnalyzeEntryResponse> analyzeEntry(
+    File audioFile,
+    String userId,
+  ) async {
+    try {
+      final url = ApiConstants.analyzeEntryUrl;
+      debugPrint('Making analyze entry request to: $url');
+
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+
+      // Add the audio file
+      request.files.add(
+        await http.MultipartFile.fromPath('audio', audioFile.path),
+      );
+
+      // Add user_id parameter
+      request.fields['user_id'] = userId;
+
+      // Add headers
+      request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
+
+      debugPrint('Uploading audio file: ${audioFile.path}');
+      debugPrint('User ID: $userId');
+
+      final streamedResponse = await request.send().timeout(_timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint('Analyze entry response status: ${response.statusCode}');
+      debugPrint('Analyze entry response body length: ${response.body.length}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        debugPrint('Successfully parsed analyze entry JSON data');
+        return AnalyzeEntryResponse.fromJson(jsonData);
+      } else {
+        debugPrint(
+          'Analyze entry API Error: ${response.statusCode} - ${response.body}',
+        );
+        throw Exception('Failed to analyze entry: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Exception in analyzeEntry: $e');
+      throw Exception('Error analyzing entry: $e');
+    }
   }
 }

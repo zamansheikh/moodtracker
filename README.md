@@ -8,7 +8,8 @@ An AI-powered Flutter mood tracking application that integrates with a backend A
 - **Interactive Charts**: Visual representation of stress and joy levels over time
 - **Period Selection**: Switch between weekly and monthly data views
 - **Mood Analytics**: Displays mood improvement percentages and emotional word analysis
-- **Audio Recording**: Record daily diary entries with transcription
+- **Audio Recording & Analysis**: Record daily diary entries with AI transcription and emotion analysis
+- **Cloud Integration**: Upload audio for sentiment analysis and emotion detection
 - **Error Handling**: Graceful handling of network issues and API errors
 
 ## API Integration
@@ -20,10 +21,12 @@ The app integrates with a mood analytics API:
 ### Endpoints Used
 
 - `GET /get-summary?user_id=sbik123&period=weekly`
-- `GET /get-summary?user_id=sbik123&period=monthly`
+- `GET /get-summary?user_id=sbik123&period=monthly`  
+- `POST /analyze-entry` (multipart form upload)
 
 ### API Response Structure
 
+**Get Summary Response:**
 ```json
 {
   "entries": [
@@ -48,6 +51,16 @@ The app integrates with a mood analytics API:
 }
 ```
 
+**Analyze Entry Response:**
+```json
+{
+  "emotion": "{\"sadness\": 0.0005, \"joy\": 0.9984, \"love\": 0.0006, ...}",
+  "sentiment": "Positive",
+  "userid": "sbik123",
+  "word_cloud": "{\"happy\": {\"frequency\": 5, \"emotion\": \"positive\", \"color\": \"green\"}, ...}"
+}
+```
+
 ## Project Structure
 
 ```
@@ -55,13 +68,16 @@ lib/
 ├── constants/
 │   └── api_constants.dart          # API URLs and configuration
 ├── models/
-│   └── mood_summary_model.dart     # Data models for API responses
+│   ├── mood_summary_model.dart     # Data models for API responses
+│   └── analyze_entry_model.dart    # Models for audio analysis API
 ├── services/
 │   ├── mood_api_service.dart       # HTTP service for API calls
 │   └── gemini_service.dart         # AI transcription service
+├── controllers/
+│   └── audio_controller.dart       # Audio recording and analysis logic
 ├── views/
 │   ├── dashboard_page.dart         # Main dashboard with mood data
-│   ├── record_page.dart            # Audio recording page
+│   ├── record_page.dart            # Audio recording and analysis page
 │   └── widgets/
 │       └── mood_trend_chart.dart   # Chart widget for trends
 └── main.dart                       # App entry point
@@ -133,6 +149,14 @@ To update the API URL (e.g., when ngrok URL changes), modify the `baseUrl` in `A
   - Mood distribution (Positive/Negative/Neutral)
   - Mood improvement percentage
   - Total entry count
+
+### Recording and Analysis
+
+- **Two-step Process**: Record → Transcribe → Analyze
+- **Local Transcription**: Uses Gemini AI for speech-to-text
+- **Cloud Analysis**: Uploads audio for emotion and sentiment analysis
+- **Results Display**: Shows analysis results in user-friendly dialog
+- **Error Handling**: Graceful handling of transcription and analysis failures
 
 ### Real-time Data Loading
 

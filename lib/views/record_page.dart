@@ -15,7 +15,6 @@ class _RecordPageState extends State<RecordPage> {
   final TextEditingController _textController = TextEditingController();
   bool _isTranscribing = false;
   bool _isConfirmMode = false;
-  String _audioFilePath = '';
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -47,9 +46,56 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<void> _handleSaveOrConfirm(BuildContext context) async {
     if (_isConfirmMode) {
-      // Confirm and save the note, then navigate back
-     //Call api to save the audio to cloud
-     
+      // Confirm and save the note, then call API to analyze audio
+      setState(() {
+        _isTranscribing = true;
+      });
+
+      // Call API to save and analyze the audio
+      final analysisResult = await _controller.saveAndAnalyzeAudio(context);
+
+      setState(() {
+        _isTranscribing = false;
+      });
+
+      if (analysisResult != null) {
+        // Show analysis results to user
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Analysis Results'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Sentiment: ${analysisResult.sentiment}'),
+                    const SizedBox(height: 8),
+                    const Text('Top Emotions:'),
+                    ...analysisResult.emotion.entries
+                        .where((e) => e.value > 0.1) // Show emotions > 10%
+                        .map(
+                          (e) => Text(
+                            '• ${e.key}: ${(e.value * 100).toStringAsFixed(1)}%',
+                          ),
+                        )
+                        .take(3), // Show top 3
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      }
 
       if (context.mounted) {
         Navigator.pop(context);
@@ -59,16 +105,11 @@ class _RecordPageState extends State<RecordPage> {
       setState(() {
         _isTranscribing = true;
       });
-      // await _controller.saveAndTranscribeRecording(
-      //   context,
-      // ); // Transcribe the audio
-
-      final String audioFilePath = await _controller.saveAndReturnPath(context);
+      await _controller.saveAndReturnPath(context);
       setState(() {
         _textController.text = _controller.audioModel.transcribedText;
         _isTranscribing = false;
         _isConfirmMode = true;
-        _audioFilePath = audioFilePath;
       });
     }
   }

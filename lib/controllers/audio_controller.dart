@@ -9,12 +9,16 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/audio_model.dart';
 import '../services/gemini_service.dart';
+import '../services/mood_api_service.dart';
+import '../constants/api_constants.dart';
+import '../models/analyze_entry_model.dart';
 
 class AudioController {
   final AudioRecorder audioRecorder = AudioRecorder();
   final AudioPlayer audioPlayer = AudioPlayer();
   final stt.SpeechToText _speechToText = stt.SpeechToText();
   final GeminiService _geminiService = GeminiService();
+  final MoodApiService _moodApiService = MoodApiService();
   StreamSubscription<PlayerState>? _playerStateSubscription;
 
   AudioModel audioModel = AudioModel();
@@ -218,6 +222,62 @@ class AudioController {
       ).showSnackBar(SnackBar(content: Text('Audio saved to $newPath')));
     }
     return newPath;
+  }
+
+  // Save audio and analyze it using the cloud API
+  Future<AnalyzeEntryResponse?> saveAndAnalyzeAudio(
+    BuildContext context,
+  ) async {
+    debugPrint('Saving and analyzing audio from ${audioModel.filePath}');
+    if (audioModel.filePath == null) return null;
+
+    try {
+      // First transcribe the audio locally
+      final transcribedText = await _geminiService.transcribeAudio(
+        File(audioModel.filePath!),
+      );
+
+      setState(() {
+        audioModel = audioModel.copyWith(transcribedText: transcribedText);
+      });
+
+      // Then upload to cloud for analysis
+      final result = await _moodApiService.analyzeEntry(
+        File(audioModel.filePath!),
+        ApiConstants.userId,
+      );
+
+      debugPrint('Audio analysis completed successfully');
+      debugPrint('Sentiment: ${result.sentiment}');
+      debugPrint('Emotions: ${result.emotion}');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Audio analyzed! Sentiment: ${result.sentiment}'),
+            backgroundColor:
+                result.sentiment == 'Positive'
+                    ? Colors.green
+                    : result.sentiment == 'Negative'
+                    ? Colors.red
+                    : Colors.orange,
+          ),
+        );
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint('Error analyzing audio: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error analyzing audio: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    }
   }
 
   void dispose() {
