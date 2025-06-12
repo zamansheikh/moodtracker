@@ -5,28 +5,36 @@ import '../constants/api_constants.dart';
 import '../models/mood_summary_model.dart';
 
 class MoodApiService {
-  static const Duration _timeout = Duration(seconds: 30);  Future<MoodSummaryResponse> getMoodSummary({String period = 'weekly'}) async {
+  static const Duration _timeout = Duration(seconds: 30);
+  Future<MoodSummaryResponse> getMoodSummary({String period = 'weekly'}) async {
     try {
       final url = ApiConstants.getSummaryUrl(period: period);
       debugPrint('Making API request to: $url'); // Debug log
-      
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning
-        },
-      ).timeout(_timeout);
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'ngrok-skip-browser-warning':
+                  'true', // Skip ngrok browser warning
+            },
+          )
+          .timeout(_timeout);
 
       debugPrint('API Response status: ${response.statusCode}'); // Debug log
-      debugPrint('API Response body length: ${response.body.length}'); // Debug log
+      debugPrint(
+        'API Response body length: ${response.body.length}',
+      ); // Debug log
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         debugPrint('Successfully parsed JSON data'); // Debug log
         return MoodSummaryResponse.fromJson(jsonData);
       } else {
-        debugPrint('API Error: ${response.statusCode} - ${response.body}'); // Debug log
+        debugPrint(
+          'API Error: ${response.statusCode} - ${response.body}',
+        ); // Debug log
         throw Exception('Failed to load mood summary: ${response.statusCode}');
       }
     } catch (e) {
@@ -54,18 +62,20 @@ class MoodApiService {
   // Calculate mood improvement percentage (simplified)
   double calculateMoodImprovement(List<MoodEntry> entries) {
     if (entries.length < 2) return 0.0;
-    
+
     final recentEntries = entries.take(entries.length ~/ 2).toList();
     final olderEntries = entries.skip(entries.length ~/ 2).toList();
-    
-    final recentPositive = recentEntries.where((e) => e.mood == 'Positive').length;
-    final olderPositive = olderEntries.where((e) => e.mood == 'Positive').length;
-    
+
+    final recentPositive =
+        recentEntries.where((e) => e.mood == 'Positive').length;
+    final olderPositive =
+        olderEntries.where((e) => e.mood == 'Positive').length;
+
     if (olderEntries.isEmpty) return 0.0;
-    
+
     final recentPercentage = recentPositive / recentEntries.length;
     final olderPercentage = olderPositive / olderEntries.length;
-    
+
     return ((recentPercentage - olderPercentage) * 100);
   }
 }

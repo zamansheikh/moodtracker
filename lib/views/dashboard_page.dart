@@ -20,17 +20,21 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _loadMoodData();
-  }  Future<void> _loadMoodData() async {
+  }
+
+  Future<void> _loadMoodData() async {
     try {
       setState(() {
         _isLoading = true;
         _error = null;
       });
-      
+
       debugPrint('Loading mood data from API...');
-      final moodData = await _apiService.getMoodSummary(period: _selectedPeriod);
+      final moodData = await _apiService.getMoodSummary(
+        period: _selectedPeriod,
+      );
       debugPrint('Successfully loaded ${moodData.entries.length} mood entries');
-      
+
       setState(() {
         _moodSummary = moodData;
         _isLoading = false;
@@ -57,10 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadMoodData,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMoodData),
         ],
       ),
       body: _buildBody(),
@@ -100,13 +101,14 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),      child: Column(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Period Selector
           _buildPeriodSelector(),
           const SizedBox(height: 20),
-          
+
           // Daily Diary (Record) Button
           _buildRecordButton(),
           const SizedBox(height: 20),
@@ -163,10 +165,7 @@ class _DashboardPageState extends State<DashboardPage> {
         Navigator.pushNamed(context, '/record');
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 16,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
@@ -176,16 +175,10 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             const Text(
               'DAILY DIARY (RECORD)',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
@@ -217,12 +210,16 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     // Get emotion trends from API data
-    final stressData = _apiService.getEmotionTrend(_moodSummary!.entries, 'stress')
-        .map((e) => e * 5) // Scale to 0-5 range for chart
-        .toList();
-    final joyData = _apiService.getEmotionTrend(_moodSummary!.entries, 'joy')
-        .map((e) => e * 5) // Scale to 0-5 range for chart
-        .toList();
+    final stressData =
+        _apiService
+            .getEmotionTrend(_moodSummary!.entries, 'stress')
+            .map((e) => e * 5) // Scale to 0-5 range for chart
+            .toList();
+    final joyData =
+        _apiService
+            .getEmotionTrend(_moodSummary!.entries, 'joy')
+            .map((e) => e * 5) // Scale to 0-5 range for chart
+            .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,9 +276,13 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    final moodImprovement = _apiService.calculateMoodImprovement(_moodSummary!.entries);
+    final moodImprovement = _apiService.calculateMoodImprovement(
+      _moodSummary!.entries,
+    );
     final topWords = _moodSummary!.topEmotionalWords.take(5).toList();
-    final moodDistribution = _apiService.getMoodDistribution(_moodSummary!.entries);
+    final moodDistribution = _apiService.getMoodDistribution(
+      _moodSummary!.entries,
+    );
 
     return Container(
       width: double.infinity,
@@ -298,7 +299,7 @@ class _DashboardPageState extends State<DashboardPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          
+
           // Top emotional words
           if (topWords.isNotEmpty) ...[
             const Text(
@@ -309,17 +310,22 @@ class _DashboardPageState extends State<DashboardPage> {
             Wrap(
               spacing: 8,
               runSpacing: 4,
-              children: topWords.map((word) => Chip(
-                label: Text(
-                  '${word.word} (${word.frequency})',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                backgroundColor: _getEmotionColor(word.emotion),
-              )).toList(),
+              children:
+                  topWords
+                      .map(
+                        (word) => Chip(
+                          label: Text(
+                            '${word.word} (${word.frequency})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          backgroundColor: _getEmotionColor(word.emotion),
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 10),
           ],
-          
+
           // Mood distribution
           if (moodDistribution.isNotEmpty) ...[
             const Text(
@@ -327,16 +333,18 @@ class _DashboardPageState extends State<DashboardPage> {
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 4),
-            ...moodDistribution.entries.map((entry) => Text(
-              '  ${entry.key}: ${entry.value} entries',
-              style: const TextStyle(fontSize: 14),
-            )),
+            ...moodDistribution.entries.map(
+              (entry) => Text(
+                '  ${entry.key}: ${entry.value} entries',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
             const SizedBox(height: 10),
           ],
-          
+
           // Mood improvement
           Text(
-            moodImprovement >= 0 
+            moodImprovement >= 0
                 ? 'Your mood has improved ${moodImprovement.toStringAsFixed(1)}% this ${_moodSummary!.period}'
                 : 'Your mood has declined ${moodImprovement.abs().toStringAsFixed(1)}% this ${_moodSummary!.period}',
             style: TextStyle(
@@ -344,7 +352,7 @@ class _DashboardPageState extends State<DashboardPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           const SizedBox(height: 10),
           Text(
             'Total entries: ${_moodSummary!.entryCount}',

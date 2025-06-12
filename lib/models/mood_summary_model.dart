@@ -7,16 +7,17 @@ class MoodEntry {
     required this.emotion,
     required this.journalDate,
     required this.mood,
-  });  factory MoodEntry.fromJson(Map<String, dynamic> json) {
+  });
+  factory MoodEntry.fromJson(Map<String, dynamic> json) {
     // Parse the EMOTION string (which is a JSON string) to Map
     final emotionData = json['EMOTION'] as String;
     final emotionMap = <String, double>{};
-    
+
     try {
       // Simple manual parsing since the format is predictable
       final cleanEmotion = emotionData.replaceAll(RegExp(r'[{}"]'), '');
       final emotionPairs = cleanEmotion.split(', ');
-      
+
       for (String pair in emotionPairs) {
         final keyValue = pair.split(': ');
         if (keyValue.length == 2) {
@@ -24,11 +25,12 @@ class MoodEntry {
           final value = double.tryParse(keyValue[1].trim()) ?? 0.0;
           emotionMap[key] = value;
         }
-      }    } catch (e) {
+      }
+    } catch (e) {
       // Fallback parsing if JSON parsing fails
       // Use debugPrint instead of print for Flutter
     }
-    
+
     return MoodEntry(
       emotion: emotionMap,
       journalDate: json['JOURNAL_DATE'] as String,
@@ -99,16 +101,18 @@ class MoodSummaryResponse {
   factory MoodSummaryResponse.fromJson(Map<String, dynamic> json) {
     // Parse word cloud - simplified for now since it's complex
     final wordCloudMap = <String, WordCloudItem>{};
-    
+
     return MoodSummaryResponse(
-      entries: (json['entries'] as List)
-          .map((e) => MoodEntry.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      entries:
+          (json['entries'] as List)
+              .map((e) => MoodEntry.fromJson(e as Map<String, dynamic>))
+              .toList(),
       entryCount: json['entry_count'] as int,
       period: json['period'] as String,
-      topEmotionalWords: (json['top_emotional_words'] as List)
-          .map((e) => TopEmotionalWord.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      topEmotionalWords:
+          (json['top_emotional_words'] as List)
+              .map((e) => TopEmotionalWord.fromJson(e as Map<String, dynamic>))
+              .toList(),
       userId: json['user_id'] as String,
       wordCloud: wordCloudMap, // Simplified for now
     );
