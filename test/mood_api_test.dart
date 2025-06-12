@@ -1,15 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:moodtracker/services/mood_api_service.dart';
 import 'package:moodtracker/constants/api_constants.dart';
 
 void main() {
   group('Mood API Service Tests', () {
-    late MoodApiService apiService;
-
-    setUp(() {
-      apiService = MoodApiService();
-    });
-
     test('API Constants should have correct base URL', () {
       expect(ApiConstants.baseUrl, 'https://crane-meet-poorly.ngrok-free.app');
       expect(ApiConstants.userId, 'sbik123');

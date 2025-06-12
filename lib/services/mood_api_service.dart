@@ -1,14 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../constants/api_constants.dart';
 import '../models/mood_summary_model.dart';
 
 class MoodApiService {
-  static const Duration _timeout = Duration(seconds: 30);
-  Future<MoodSummaryResponse> getMoodSummary({String period = 'weekly'}) async {
+  static const Duration _timeout = Duration(seconds: 30);  Future<MoodSummaryResponse> getMoodSummary({String period = 'weekly'}) async {
     try {
       final url = ApiConstants.getSummaryUrl(period: period);
-      print('Making API request to: $url'); // Debug log
+      debugPrint('Making API request to: $url'); // Debug log
       
       final response = await http.get(
         Uri.parse(url),
@@ -18,19 +18,19 @@ class MoodApiService {
         },
       ).timeout(_timeout);
 
-      print('API Response status: ${response.statusCode}'); // Debug log
-      print('API Response body length: ${response.body.length}'); // Debug log
+      debugPrint('API Response status: ${response.statusCode}'); // Debug log
+      debugPrint('API Response body length: ${response.body.length}'); // Debug log
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
-        print('Successfully parsed JSON data'); // Debug log
+        debugPrint('Successfully parsed JSON data'); // Debug log
         return MoodSummaryResponse.fromJson(jsonData);
       } else {
-        print('API Error: ${response.statusCode} - ${response.body}'); // Debug log
+        debugPrint('API Error: ${response.statusCode} - ${response.body}'); // Debug log
         throw Exception('Failed to load mood summary: ${response.statusCode}');
       }
     } catch (e) {
-      print('Exception in getMoodSummary: $e'); // Debug log
+      debugPrint('Exception in getMoodSummary: $e'); // Debug log
       throw Exception('Error fetching mood summary: $e');
     }
   }
