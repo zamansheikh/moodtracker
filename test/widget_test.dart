@@ -11,20 +11,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moodtracker/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('App loads and shows dashboard with welcome message', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MoodTrackerApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Verify that the dashboard page loads with welcome text in app bar
+    expect(find.text('WELCOME USER'), findsOneWidget);
+    
+    // Wait for initial rendering
     await tester.pump();
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('App shows loading state initially', (WidgetTester tester) async {
+    await tester.pumpWidget(const MoodTrackerApp());
+    
+    // Immediately after build, we should see loading indicator
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Loading your mood data...'), findsOneWidget);
   });
 }
