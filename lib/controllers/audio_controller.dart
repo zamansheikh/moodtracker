@@ -192,6 +192,34 @@ class AudioController {
     }
   }
 
+  Future<String> saveAndReturnPath(BuildContext context) async {
+    debugPrint('Transcribing audio from ${audioModel.filePath}');
+    if (audioModel.filePath == null) return '';
+
+    Directory? externalDir;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      externalDir = await getExternalStorageDirectory();
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      externalDir = await getApplicationDocumentsDirectory();
+    }
+
+    if (externalDir == null) {
+      debugPrint("Unable to determine external directory.");
+      return '';
+    }
+    String newPath =
+        '${externalDir.path}/saved_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    await File(audioModel.filePath!).copy(newPath);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Audio saved to $newPath')));
+    }
+    return newPath;
+  }
+
   void dispose() {
     audioRecorder.dispose();
     audioPlayer.dispose();

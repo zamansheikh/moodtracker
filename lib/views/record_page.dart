@@ -15,6 +15,7 @@ class _RecordPageState extends State<RecordPage> {
   final TextEditingController _textController = TextEditingController();
   bool _isTranscribing = false;
   bool _isConfirmMode = false;
+  String _audioFilePath = '';
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -47,9 +48,9 @@ class _RecordPageState extends State<RecordPage> {
   Future<void> _handleSaveOrConfirm(BuildContext context) async {
     if (_isConfirmMode) {
       // Confirm and save the note, then navigate back
-      await _controller.saveAndTranscribeRecording(
-        context,
-      ); // Assuming this saves the final note
+     //Call api to save the audio to cloud
+     
+
       if (context.mounted) {
         Navigator.pop(context);
       }
@@ -58,13 +59,16 @@ class _RecordPageState extends State<RecordPage> {
       setState(() {
         _isTranscribing = true;
       });
-      await _controller.saveAndTranscribeRecording(
-        context,
-      ); // Transcribe the audio
+      // await _controller.saveAndTranscribeRecording(
+      //   context,
+      // ); // Transcribe the audio
+
+      final String audioFilePath = await _controller.saveAndReturnPath(context);
       setState(() {
         _textController.text = _controller.audioModel.transcribedText;
         _isTranscribing = false;
         _isConfirmMode = true;
+        _audioFilePath = audioFilePath;
       });
     }
   }
