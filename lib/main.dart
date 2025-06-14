@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:moodtracker/views/splash_screen.dart';
 import 'package:moodtracker/views/dashboard_page.dart';
 import 'package:moodtracker/views/record_page.dart';
 
@@ -22,10 +23,10 @@ class MoodTrackerApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const DashboardPage(),
+        '/': (context) => const SplashScreen(),
+        '/dashboard': (context) => const DashboardPage(),
         '/record': (context) => const RecordPage(),
       },
     );
   }
 }
-
