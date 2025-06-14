@@ -29,3 +29,6 @@ flutter:
   uses-material-design: true
   assets:
     - .env  # Include .env file as an asset
+    - assets/
+    - assets/logobg.png
+    - assets/logo.png

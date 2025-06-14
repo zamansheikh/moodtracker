@@ -53,8 +53,12 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset('assets/logobg.png', fit: BoxFit.contain),
+        ),
         title: const Text(
-          'WELCOME USER',
+          'EMPATHIQ',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
